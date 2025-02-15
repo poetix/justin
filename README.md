@@ -4,7 +4,7 @@
  
 Have you ever wished that you could write Pythonic [generator functions](https://wiki.python.org/moin/Generators), or Kotlinesque [sequence blocks](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.sequences/sequence.html), in modern Java? Then it may be..._Justin time_.
 
-With the pattern implemented by _Justin_ you can easily turn a push-based API into a pull-based API, or write sequence generators with complex logic that lazily emit values as they are computed:
+With the pattern implemented by _Justin_ you can easily turn a push-based API into a pull-based API, or write sequence generators with complex logic that lazily compute values as a consumer requests them:
 
 ```java
 private void generateFibonacciSequence(Iteration<Integer> iteration) {
@@ -28,6 +28,8 @@ public void consumeFirstTenFibonacciNumbers() {
 ## Usage
 
 A _producer_ is a `Consumer<Iteration<T>>` function which receives an `Iteration<T>` parameter, and calls `produce()` on it to "yield" values to the consumer. A lambda or a method reference may be used.
+
+Each call to `produce` after the first will block the producer until a consumer has taken the previously-produced value.
 
 Pass a producer to `Iterating.over(producer)` to get a `CloseableIterator<T>` that can access the produced values sequentially in the usual way with `hasNext()` and `next()`
 
