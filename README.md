@@ -70,7 +70,7 @@ default Stream<T> traverseBreadthFirst() {
 
 ## Consumer-signalled termination
 
-Normally a producer will produce a finite sequence of values then signal to the consumer that there are no more to be had, in which case iteration will end in the usual way (i.e. the call to `Iterator.hasNext()` underlying the consumer will return false).
+Normally a producer will produce a finite sequence of values then return, in which case a signal is sent to the consumer that there are no more values available. When this happens, the next call to `hasNext()` on the `Iterator` representing the consumer will return `false`; subsequent calls to `next()` will fail with a `NoSuchElementException`.
 
 Sometimes however the producer will produce more values than the consumer is interested in - possibly an infinite sequence - and it will be up to the consumer to signal when it's finished consuming them. Since the producer is running on a virtual thread, we would like it to exit when this happens, rather than remaining blocked on a call to `produce()` forever, waiting for a call to `consume()` that will never come. (Even though virtual threads are cheap, we still don't want to risk unbounded production of continuations that are never cleaned up). 
 
@@ -92,4 +92,8 @@ How does the producer know the consumer has finished consuming? The consumer is 
 3. Wait for the garbage collector to collect it.
 
 In any of these cases, the producer is signalled to stop producing, and an `IterationFinishedException` will be thrown from its next call to `iteration.produce()`. (If you trap it and keep going, that's your lookout.)
+
+## Exception propagation
+
+Exceptions thrown within the producer are propagated to the consumer, and are thrown (wrapped in an unchecked `IterationException`) when a call is made to `Iterator.hasNext()` or `Iterator.next()`.
 
