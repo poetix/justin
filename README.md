@@ -1,10 +1,10 @@
-# justin
+# Justin
 
 > I believe in a thing called Loom.
  
-Have you ever wished that you could write Pythonic [generator functions](https://wiki.python.org/moin/Generators), or Kotlinesque [sequence blocks](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.sequences/sequence.html), in modern Java? Then it may be..._justin time_.
+Have you ever wished that you could write Pythonic [generator functions](https://wiki.python.org/moin/Generators), or Kotlinesque [sequence blocks](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.sequences/sequence.html), in modern Java? Then it may be..._Justin time_.
 
-With this pattern, you can easily turn a push-based API into a pull-based API, or write sequence generators with complex logic that lazily emit values as they are computed:
+With the pattern implemented by _Justin_ you can easily turn a push-based API into a pull-based API, or write sequence generators with complex logic that lazily emit values as they are computed:
 
 ```java
 private void generateFibonacciSequence(Iteration<Integer> iteration) {
@@ -29,7 +29,7 @@ public void consumeFirstTenFibonacciNumbers() {
 
 We observe that, in modern Java, [virtual threads](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) are implemented using continuations under the hood. This means that we can approximate behaviours that require continuations in other languages by making use of virtual threads (as a proxy for working with the [JVM-internal continuation implementation](https://github.com/openjdk/loom/blob/fibers/src/java.base/share/classes/jdk/internal/vm/Continuation.java) directly).
 
-Justin works by running the "generator" on a virtual thread, and having it "yield" to the consumer by placing a value in a single-element blocking queue.
+_Justin_ works by running the "generator" on a virtual thread, and having it "yield" to the consumer by placing a value in a single-element blocking queue.
 
 The consumer, in turn, pulls values from that same queue into `Iterator`, which may be wrapped with a `Stream`, enabling sequential reads of the values so produced.
 
