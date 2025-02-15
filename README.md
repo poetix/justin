@@ -25,6 +25,14 @@ public void consumeFirstTenFibonacciNumbers() {
 }
 ```
 
+## Usage
+
+A _producer_ is a `Consumer<Iteration<T>>` function which receives an `Iteration<T>` parameter, and calls `produce()` on it to "yield" values to the consumer. A lambda or a method reference may be used.
+
+Pass a producer to `Iterating.over(producer)` to get a `CloseableIterator<T>` that can access the produced values sequentially in the usual way with `hasNext()` and `next()`
+
+Alternatively, pass it to `Streaming.over(producer)` to get a `Stream<T>`, convenient for transformation and collection using the [Java Streams API](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html).
+
 ## How it works
 
 We observe that, in modern Java, [virtual threads](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) are implemented using continuations under the hood. This means that we can approximate behaviours that require continuations in other languages by making use of virtual threads (as a proxy for working with the [JVM-internal continuation implementation](https://github.com/openjdk/loom/blob/fibers/src/java.base/share/classes/jdk/internal/vm/Continuation.java) directly).

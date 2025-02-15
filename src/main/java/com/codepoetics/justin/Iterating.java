@@ -7,22 +7,22 @@ public final class Iterating {
 
     private Iterating() { }
 
-    public static <T> Iterator<T> over(Consumer<Iteration<T>> source) {
-        ProducerConsumerInterchange<T> state = new SemaphoredProducerConsumerInterchange<>();
+    public static <T> CloseableIterator<T> over(Consumer<Iteration<T>> producer) {
+        ProducerConsumerInterchange<T> interchange = new SemaphoredProducerConsumerInterchange<>();
 
         var producerThread = Thread.startVirtualThread(() -> {
             try {
-                source.accept(state);
-                state.finishProducing();
+                producer.accept(interchange);
+                interchange.finishProducing();
             } catch (IterationFinishedException e) {
                 // Ignore: this was just used to end execution of the iteration
             } catch (Exception e) {
-                state.finishProducingWithException(e);
+                interchange.finishProducingWithException(e);
             }
         });
 
-        return new InterchangeConnectedIterator<>(state, () -> {
-            state.finishConsuming();
+        return new InterchangeConnectedIterator<>(interchange, () -> {
+            interchange.finishConsuming();
             producerThread.interrupt();
         });
     }

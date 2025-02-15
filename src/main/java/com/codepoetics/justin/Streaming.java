@@ -9,15 +9,15 @@ import java.util.stream.StreamSupport;
 public final class Streaming {
     private Streaming() { }
 
-    public static <T> Stream<T> over(Consumer<Iteration<T>> source) {
-        var iter = Iterating.over(source);
+    public static <T> Stream<T> over(Consumer<Iteration<T>> producer) {
+        var iter = Iterating.over(producer);
         return StreamSupport.stream(
                 Spliterators.spliteratorUnknownSize(
                         iter,
                         Spliterator.IMMUTABLE & Spliterator.NONNULL),
                 false).onClose(() -> {
                     try {
-                        ((AutoCloseable) iter).close();
+                        iter.close();
                     } catch (Exception ignored) {
                         //
                     }
