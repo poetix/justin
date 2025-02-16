@@ -29,7 +29,7 @@ public void consumeFirstTenFibonacciNumbers() {
 
 A _producer_ is a `Consumer<Iteration<T>>` function which receives an `Iteration<T>` parameter, and calls `produce()` on it to "yield" values to the consumer. A lambda or a method reference may be used.
 
-Each call to `produce` after the first will block the producer until a consumer has taken the previously-produced value.
+Each call to `produce` will block the producer until a consumer has taken the produced value.
 
 Pass a producer to `Iterating.over(producer)` to get a `CloseableIterator<T>` that can access the produced values sequentially in the usual way with `hasNext()` and `next()`
 
@@ -39,9 +39,9 @@ Alternatively, pass it to `Streaming.over(producer)` to get a `Stream<T>`, conve
 
 We observe that, in modern Java, [virtual threads](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html) are implemented using continuations under the hood. This means that we can approximate behaviours that require continuations in other languages by making use of virtual threads (as a proxy for working with the [JVM-internal continuation implementation](https://github.com/openjdk/loom/blob/fibers/src/java.base/share/classes/jdk/internal/vm/Continuation.java) directly).
 
-_Justin_ works by running the "generator" on a virtual thread, and having it "yield" to the consumer by placing a value in a single-element blocking queue.
+_Justin_ works by running the "generator" on a virtual thread, and having it "yield" to the consumer by placing a value in a single-element blocking relay that blocks the producer until the consumer has taken the produced item.
 
-The consumer, in turn, pulls values from that same queue into `Iterator`, which may be wrapped with a `Stream`, enabling sequential reads of the values so produced.
+The consumer, in turn, pulls values from that same relay into an `Iterator`, which may be wrapped with a `Stream`, enabling sequential reads of the values so produced.
 
 Users of [goroutines and channels](https://go.dev/tour/concurrency/4) may find this approach familiar.
 

@@ -2,16 +2,16 @@ package com.codepoetics.justin;
 
 import java.util.concurrent.Semaphore;
 
-public class SingleElementBlockingQueue<T> {
+public class SingleElementBlockingRelay<T> {
 
     private volatile T value;
     private final Semaphore readSemaphore = new Semaphore(0);
-    private final Semaphore writeSemaphore = new Semaphore(1);
+    private final Semaphore writeSemaphore = new Semaphore(0);
 
     public void write(T value) throws InterruptedException {
-        writeSemaphore.acquire();
         this.value = value;
         readSemaphore.release();
+        writeSemaphore.acquire();
     }
 
     public T read() throws InterruptedException {

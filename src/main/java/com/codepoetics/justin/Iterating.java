@@ -1,6 +1,5 @@
 package com.codepoetics.justin;
 
-import java.util.Iterator;
 import java.util.function.Consumer;
 
 public final class Iterating {
@@ -8,7 +7,7 @@ public final class Iterating {
     private Iterating() { }
 
     public static <T> CloseableIterator<T> over(Consumer<Iteration<T>> producer) {
-        ProducerConsumerInterchange<T> interchange = new SemaphoredProducerConsumerInterchange<>();
+        ProducerConsumerInterchange<T> interchange = new RelayingProducerConsumerInterchange<>();
 
         var producerThread = Thread.startVirtualThread(() -> {
             try {

@@ -1,14 +1,14 @@
 package com.codepoetics.justin;
 
-final class SemaphoredProducerConsumerInterchange<T> implements ProducerConsumerInterchange<T> {
+final class RelayingProducerConsumerInterchange<T> implements ProducerConsumerInterchange<T> {
 
     private volatile boolean consumerIsFinished;
-    private final SingleElementBlockingQueue<IterationSignal<T>> queue = new SingleElementBlockingQueue<>();
+    private final SingleElementBlockingRelay<IterationSignal<T>> relay = new SingleElementBlockingRelay<>();
 
     @Override
     public void produce(T value) {
         try {
-            queue.write(new IterationSignal.Value<>(value));
+            relay.write(new IterationSignal.Value<>(value));
             if (consumerIsFinished) {
                 throw new IterationFinishedException();
             }
@@ -21,7 +21,7 @@ final class SemaphoredProducerConsumerInterchange<T> implements ProducerConsumer
     @Override
     public IterationSignal<T> consume() {
         try {
-            return queue.read();
+            return relay.read();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return new IterationSignal.Finished<>();
@@ -31,13 +31,13 @@ final class SemaphoredProducerConsumerInterchange<T> implements ProducerConsumer
     @Override
     public void finishConsuming() {
         consumerIsFinished = true;
-        queue.drain();
+        relay.drain();
     }
 
     @Override
     public void finishProducing() {
         try {
-            queue.write(new IterationSignal.Finished<>());
+            relay.write(new IterationSignal.Finished<>());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -46,7 +46,7 @@ final class SemaphoredProducerConsumerInterchange<T> implements ProducerConsumer
     @Override
     public void finishProducingWithException(Exception exception) {
         try {
-            queue.write(new IterationSignal.FinishedExceptionally<>(exception));
+            relay.write(new IterationSignal.FinishedExceptionally<>(exception));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
